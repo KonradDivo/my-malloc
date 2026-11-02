@@ -1,0 +1,29 @@
+# build directories
+build/
+build-*/
+out/
+cmake-build-*/
+
+# CMake leftovers when configuring in-source
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+
+# binaries and objects
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.pdb
+*.ilk
+
+# editors / IDEs
+.vs/
+.vscode/
+.idea/
+
+# OS noise
+Thumbs.db
+.DS_Store
