@@ -28,7 +28,7 @@
 #define CHECK(cond)                                                     \
     do {                                                                \
         if (!(cond)) {                                                  \
-            fprintf(stderr, "  ECHEC %s:%d  (%s)\n", __FILE__, __LINE__, \
+            fprintf(stderr, "  FAIL %s:%d  (%s)\n", __FILE__, __LINE__,  \
                     #cond);                                             \
             fflush(stderr);                                             \
             abort();                                                    \
@@ -233,7 +233,7 @@ static int run_named(const char *name)
             return 0;
         }
     }
-    fprintf(stderr, "test inconnu : %s\n", name);
+    fprintf(stderr, "unknown test: %s\n", name);
     return 2;
 }
 
@@ -255,7 +255,8 @@ int main(int argc, char **argv)
         intptr_t status = _spawnv(_P_WAIT, exe, args);
         ok = (status == 0);
         if (!ok) {
-            printf("[FAIL] %-14s code=%d\n", TESTS[i].name, (int)status);
+            printf("[FAIL] %-14s exit code=%d\n", TESTS[i].name,
+                   (int)status);
         }
 #else
         pid_t pid = fork();
@@ -271,7 +272,7 @@ int main(int argc, char **argv)
         } else {
             ok = (WEXITSTATUS(status) == 0);
             if (!ok) {
-                printf("[FAIL] %-14s code=%d\n", TESTS[i].name,
+                printf("[FAIL] %-14s exit code=%d\n", TESTS[i].name,
                        WEXITSTATUS(status));
             }
         }
@@ -284,6 +285,6 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("\n%zu/%zu tests passes\n", NTESTS - failed, (size_t)NTESTS);
+    printf("\n%zu/%zu tests passed\n", NTESTS - failed, (size_t)NTESTS);
     return failed == 0 ? 0 : 1;
 }

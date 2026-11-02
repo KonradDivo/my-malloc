@@ -14,8 +14,8 @@ static void show(const char *title)
     mm_stats s;
     mm_get_stats(&s);
     printf("\n[%s]\n", title);
-    printf("  blocs=%zu  pages=%zu  tas=%zu o  alloue=%zu o  libre=%zu o"
-           "  plus_grand_libre=%zu o\n",
+    printf("  blocks=%zu  pages=%zu  heap=%zu B  used=%zu B  free=%zu B"
+           "  largest_free=%zu B\n",
            s.block_count, s.page_count, s.heap_size, s.allocated_bytes,
            s.free_bytes, s.largest_free);
 }
@@ -23,63 +23,63 @@ static void show(const char *title)
 int main(void)
 {
     mm_init();
-    printf("=== mon malloc, d'apres l'article d'Alejandro Nadal ===\n");
-    show("etat initial");
+    printf("=== my malloc, after Alejandro Nadal's article ===\n");
+    show("initial state");
     mm_dump(stdout);
 
     char *a = my_malloc(64);
     char *b = my_malloc(128);
     char *c = my_malloc(256);
     if (a == NULL || b == NULL || c == NULL) {
-        printf("allocation impossible\n");
+        printf("allocation failed\n");
         return 1;
     }
     strcpy(a, "alpha");
     strcpy(b, "bravo");
     strcpy(c, "charlie");
 
-    show("3 allocations : 64 / 128 / 256 octets");
+    show("3 allocations: 64 / 128 / 256 bytes");
     mm_dump(stdout);
 
-    printf("\nfree(b) : le bloc du milieu devient libre\n");
+    printf("\nfree(b): the middle block becomes free\n");
     my_free(b);
-    show("apres free(b)");
+    show("after free(b)");
     mm_dump(stdout);
 
-    printf("\nfree(a) puis free(c) : les trois blocs fusionnent\n");
+    printf("\nfree(a) then free(c): all three blocks merge\n");
     my_free(a);
     my_free(c);
-    show("apres free(a) et free(c)");
+    show("after free(a) and free(c)");
     mm_dump(stdout);
 
-    printf("\nmy_malloc(5000) : plus grand qu'une page, le tas doit grandir\n");
+    printf("\nmy_malloc(5000): larger than one page, the heap must grow\n");
     unsigned char *big = my_malloc(5000);
     if (big == NULL) {
-        printf("allocation impossible\n");
+        printf("allocation failed\n");
         return 1;
     }
     memset(big, 0xAB, 5000);
-    show("apres my_malloc(5000)");
+    show("after my_malloc(5000)");
     mm_dump(stdout);
 
-    printf("\nfree(big) : les pages en trop sont rendues a l'OS\n");
+    printf("\nfree(big): the extra pages are returned to the OS\n");
     my_free(big);
-    show("apres free(big)");
+    show("after free(big)");
     mm_dump(stdout);
 
-    printf("\n--- les pieges ---\n");
+    printf("\n--- the traps ---\n");
     char *x = my_malloc(32);
     printf("free(x)        : %s\n",
-           my_free(x) ? "accepte (normal)" : "refuse (anormal)");
+           my_free(x) ? "accepted (normal)" : "rejected (abnormal)");
     printf("double free    : %s\n",
-           my_free(x) ? "ACCEPTE (anormal)" : "refuse correctement");
+           my_free(x) ? "ACCEPTED (abnormal)" : "correctly rejected");
 
     int local = 0;
-    printf("free invalide  : %s\n",
-           my_free(&local) ? "ACCEPTE (anormal)" : "refuse correctement");
+    printf("invalid free   : %s\n",
+           my_free(&local) ? "ACCEPTED (abnormal)" : "correctly rejected");
     printf("free(NULL)     : %s\n",
-           my_free(NULL) ? "accepte (normal)" : "refuse (anormal)");
+           my_free(NULL) ? "accepted (normal)" : "rejected (abnormal)");
 
-    printf("\nintegrite du tas : %s\n", mm_check() ? "OK" : "CORROMPU");
+    printf("\nheap integrity : %s\n", mm_check() ? "OK" : "CORRUPT");
     return 0;
 }
